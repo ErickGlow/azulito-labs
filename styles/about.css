@@ -1,0 +1,23 @@
+.about {
+  padding: 160px 8%;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.about span {
+  color: #53a3ff;
+  letter-spacing: 3px;
+  font-size: 13px;
+}
+
+.about h2 {
+  font-size: 70px;
+  margin: 25px 0;
+  line-height: 1;
+}
+
+.about p {
+  font-size: 22px;
+  line-height: 2;
+  color: #aaaaaa;
+}

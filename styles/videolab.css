@@ -1,0 +1,92 @@
+.videolab {
+  padding: 120px 10%;
+  background: #080808;
+  text-align: center;
+}
+
+.videolab h2 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.videolab p {
+  color: #aaa;
+  max-width: 700px;
+  margin: 0 auto 30px;
+}
+
+.videolab {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 60px;
+  text-align: left;
+}
+
+.video-left {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.video-left span {
+  color: #53a3ff;
+  letter-spacing: 3px;
+  font-size: 13px;
+}
+
+.video-left button {
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 999px;
+  background: #2b83ff;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.video-left button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 30px rgba(43, 131, 255, 0.4);
+}
+
+.video-right {
+  display: flex;
+  justify-content: center;
+}
+
+.video-card {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 16 / 9;
+  border: 2px dashed #2b83ff;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  color: #2b83ff;
+}
+
+.play {
+  font-size: 40px;
+}
+
+@media (max-width: 900px) {
+  .videolab {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .video-left {
+    align-items: center;
+  }
+
+  .video-left button {
+    align-self: center;
+  }
+}

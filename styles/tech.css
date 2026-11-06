@@ -1,0 +1,63 @@
+.tech{
+
+padding:160px 8%;
+
+background:#070707;
+
+text-align:center;
+
+}
+
+.tech span{
+
+letter-spacing:3px;
+
+color:#53a3ff;
+
+font-size:13px;
+
+}
+
+.tech h2{
+
+font-size:64px;
+
+margin:25px 0 70px;
+
+}
+
+.tech-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+gap:20px;
+
+}
+
+.tech-card{
+
+padding:30px;
+
+background:#101010;
+
+border:1px solid #1d1d1d;
+
+border-radius:18px;
+
+font-size:22px;
+
+transition:.35s;
+
+}
+
+.tech-card:hover{
+
+transform:translateY(-8px);
+
+border-color:#2b83ff;
+
+box-shadow:0 0 30px rgba(43,131,255,.25);
+
+}

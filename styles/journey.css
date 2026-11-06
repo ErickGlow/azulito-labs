@@ -1,0 +1,57 @@
+.journey{
+    padding:140px 8%;
+    background:#050505;
+}
+
+.journey h2{
+    text-align:center;
+    font-size:64px;
+    margin-bottom:80px;
+}
+
+.timeline{
+    max-width:900px;
+    margin:auto;
+    position:relative;
+}
+
+.timeline::before{
+    content:"";
+    position:absolute;
+    left:16px;
+    top:0;
+    bottom:0;
+    width:3px;
+    background:#2b83ff;
+}
+
+.timeline-item{
+    display:flex;
+    gap:30px;
+    margin-bottom:70px;
+    position:relative;
+}
+
+.dot{
+    width:35px;
+    height:35px;
+    border-radius:50%;
+    background:#2b83ff;
+    box-shadow:0 0 25px #2b83ff;
+    flex-shrink:0;
+}
+
+.content span{
+    color:#5ea3ff;
+    font-size:14px;
+}
+
+.content h3{
+    margin:12px 0;
+    font-size:34px;
+}
+
+.content p{
+    color:#aaa;
+    line-height:1.8;
+}
