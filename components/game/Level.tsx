@@ -12,6 +12,7 @@ const HIT_TEXT: Record<string, string> = {
   bus: "¡La buseta! Azulito got hit by a bus.",
   moto: "¡Moto! Azulito got hit by a motorbike.",
   person: "Oops — a pedestrian stepped on Azulito.",
+  gordo: "¡Uy! A very Botero gentleman sat on Azulito.",
 };
 
 interface Props {
@@ -26,6 +27,12 @@ interface Props {
 export default function Level({ dept, cityIndex, onExit, onWin, onNext, hasNext }: Props) {
   const level = useMemo(() => buildLevel(dept, cityIndex), [dept, cityIndex]);
   const game = useRef<GameState>(newGameState());
+  // чекпоинт под-уровня: ряд, улов и собранные ягоды на момент входа
+  const checkpoint = useRef<{ row: number; berries: number; collected: Set<string>; name: string } | null>(null);
+  const [zone, setZone] = useState<string | null>(null);
+  const [banner, setBanner] = useState<string | null>(null);
+  // тяжёлые эффекты (AO, свечение) только на десктопе
+  const [hq] = useState(() => new URLSearchParams(window.location.search).has("hq") || typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches && (navigator.hardwareConcurrency ?? 4) > 4);
   const [run, setRun] = useState(0); // смена ключа = рестарт
   const [viewRow, setViewRow] = useState(0);
   const [hud, setHud] = useState({ berries: 0, row: 0 });
@@ -33,11 +40,24 @@ export default function Level({ dept, cityIndex, onExit, onWin, onNext, hasNext 
   const [showHint, setShowHint] = useState(true);
   const city = dept.cities[cityIndex];
 
-  const restart = useCallback(() => {
-    game.current = newGameState();
+  // если уровень начинается прямо в достопримечательности — показать её сразу
+  useEffect(() => {
+    const z = level.lanes[0]?.zone;
+    if (!z) return;
+    setZone(z);
+    setBanner(z);
+    const t = setTimeout(() => setBanner(null), 2600);
+    return () => clearTimeout(t);
+  }, [level, run]);
+
+  const restart = useCallback((fromCheckpoint = false) => {
+    const cp = fromCheckpoint ? checkpoint.current : null;
+    if (!fromCheckpoint) checkpoint.current = null;
+    game.current = cp ? newGameState(cp.row, cp.berries, cp.collected) : newGameState();
     setRun((r) => r + 1);
-    setViewRow(0);
-    setHud({ berries: 0, row: 0 });
+    setViewRow(cp?.row ?? 0);
+    setHud({ berries: cp?.berries ?? 0, row: cp?.row ?? 0 });
+    setZone(cp?.name ?? null);
     setStatus("playing");
   }, []);
 
@@ -46,12 +66,24 @@ export default function Level({ dept, cityIndex, onExit, onWin, onNext, hasNext 
       const g = game.current;
       setViewRow(row);
       setHud({ berries: g.berries, row: g.maxRow });
+      const lane = level.lanes[row];
+      const z = lane?.zone ?? null;
+      setZone((prev) => {
+        if (z && z !== prev) {
+          setBanner(z);
+          setTimeout(() => setBanner(null), 2600);
+        }
+        return z;
+      });
+      if (lane?.checkpoint && checkpoint.current?.row !== row) {
+        checkpoint.current = { row, berries: g.berries, collected: new Set(g.collected), name: lane.zone ?? "" };
+      }
       if (g.status === "won") {
         setStatus("won");
         onWin(g.berries);
       }
     },
-    [onWin],
+    [onWin, level],
   );
   const onDeath = useCallback(() => setTimeout(() => setStatus("dead"), 650), []);
 
@@ -74,7 +106,7 @@ export default function Level({ dept, cityIndex, onExit, onWin, onNext, hasNext 
         e.preventDefault();
         move(...map[k]);
       } else if ((k === "r" || k === "enter") && game.current.status === "dead") {
-        restart();
+        restart(checkpoint.current !== null);
       } else if (k === "escape") {
         onExit();
       }
@@ -100,14 +132,21 @@ export default function Level({ dept, cityIndex, onExit, onWin, onNext, hasNext 
 
   return (
     <div className="level" onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
-      <Canvas key={run} shadows dpr={[1, 2]} camera={{ fov: 40, near: 0.1, far: 80 }} gl={{ antialias: true }}>
-        <Scene level={level} game={game} viewRow={viewRow} onLand={onLand} onDeath={onDeath} />
+      <Canvas key={run} shadows="soft" dpr={[1, hq ? 2 : 1.5]} camera={{ fov: 40, near: 0.1, far: 80 }} gl={{ antialias: !hq }}>
+        <Scene level={level} game={game} viewRow={viewRow} onLand={onLand} onDeath={onDeath} hq={hq} />
       </Canvas>
+
+      {banner && (
+        <div className="zone-banner" key={banner}>
+          <small>Sub-level</small>
+          📍 {banner}
+        </div>
+      )}
 
       <div className="hud" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
         <button className="hud-btn" onClick={onExit} aria-label="Back to the globe">← Globe</button>
         <div className="hud-city">
-          <span>{dept.name}</span>
+          <span>{dept.name}{zone ? ` · ${zone}` : ""}</span>
           <strong>{city}</strong>
           <div className="hud-bar"><i style={{ width: `${progress * 100}%` }} /></div>
         </div>
@@ -131,7 +170,7 @@ export default function Level({ dept, cityIndex, onExit, onWin, onNext, hasNext 
                 </p>
                 <div className="overlay-actions">
                   {hasNext && <button className="primary" onClick={onNext}>Next city →</button>}
-                  <button onClick={restart}>Play again</button>
+                  <button onClick={() => restart(false)}>Play again</button>
                   <button onClick={onExit}>Globe</button>
                 </div>
               </>
@@ -140,7 +179,16 @@ export default function Level({ dept, cityIndex, onExit, onWin, onNext, hasNext 
                 <h2>¡Cuidado!</h2>
                 <p>{HIT_TEXT[game.current.hitBy] ?? "Azulito got hit."}</p>
                 <div className="overlay-actions">
-                  <button className="primary" onClick={restart} autoFocus>Try again (R)</button>
+                  {checkpoint.current ? (
+                    <>
+                      <button className="primary" onClick={() => restart(true)} autoFocus>
+                        Continue from {checkpoint.current.name} (R)
+                      </button>
+                      <button onClick={() => restart(false)}>Restart city</button>
+                    </>
+                  ) : (
+                    <button className="primary" onClick={() => restart(false)} autoFocus>Try again (R)</button>
+                  )}
                   <button onClick={onExit}>Globe</button>
                 </div>
               </>

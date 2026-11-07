@@ -12,6 +12,10 @@ Dodge yellow taxis, buses, motos and pedestrians, and collect arándanos.
 - **Globe:** React Three Fiber; the camera flies in from the whole blueberry to Colombia; the selected department lights up green.
 - **Levels:** generated from the city name (same city — same streets every time); difficulty grows from city to city.
 - **Collisions:** vehicle positions are a pure function of time, so hit detection is exact.
+- **Landmark sub-levels:** cities have famous places inside the level. Medellín starts right in **Plaza Botero**: bronze sculptures,
+  crowds of plump Botero-style locals, street vendors, pigeons, the Palacio de la Cultura, Museo de Antioquia and the Metro. Entering a
+  landmark sets a checkpoint, so you can continue from there.
+- **Graphics:** soft shadows, ambient occlusion, bloom and procedural reflections on desktop; lighter mode on phones.
 - **Controls:** arrows / WASD, swipe or tap on mobile. Progress is saved in the browser.
 
 ## Projects
